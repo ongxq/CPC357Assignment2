@@ -1,8 +1,9 @@
 <template>
-  <div>
+  <div class="view-container">
     <div class="dashboard-grid">
       <!-- LEFT COLUMN -->
       <div class="left-panel">
+        <h1 class="dashboard-title">Smart Drainage Monitoring System</h1>
         <!-- =========================
         WATER LEVEL ALERT CARD (TOP)
         ========================== -->
@@ -49,14 +50,21 @@
                 >{{ latestBlockage.date }} • {{ latestBlockage.time }}</small
               >
             </div>
-            <div class="body">
-              <p><strong>Water Level:</strong> {{ latestBlockage.water }}%</p>
-            </div>
           </div>
+
+          <!-- <div class="blockage-status-card blockage">
+            <div class="header">
+              <span>⚠️ Blockage Detected</span>
+              <small>08/01/2026 • 05:45:17 pm</small>
+            </div>
+            <div class="body">
+              <p><strong>Water Level:</strong> 73.6%</p>
+            </div>
+          </div> -->
         </div>
 
         <!-- =========================
-        WEATHER FORECAST CARD (BOTTOM LEFT)
+        WEATHER FORECAST CARD (BOTTOM LEFT)rr
         ========================== -->
         <div class="daily-card-wrapper">
           <div v-if="selectedDay" class="weather-card">
@@ -243,6 +251,7 @@
       <table border="1" cellpadding="5">
         <thead>
           <tr>
+            <!-- <th>ID</th> -->
             <th>ID</th>
             <th>Water Level (%)</th>
             <th>Water Depth (cm)</th>
@@ -253,8 +262,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in data" :key="item.id">
-            <td>{{ item.id }}</td>
+          <tr v-for="(item, index) in data" :key="item.id">
+            <!-- <td>{{ item.id }}</td> -->
+            <td>{{ index + 1 }}</td>
             <td>{{ item.water_level }}</td>
             <td>{{ item.water_depth }}</td>
             <td>{{ item.distance }}</td>
@@ -352,35 +362,6 @@ function resetRainDateFilter() {
   endRainDate.value = "";
 }
 
-// const filteredRainDataWithDate = computed(() => {
-//   let filtered = data.value;
-
-//   if (startRainDate.value) {
-//     const start = new Date(startRainDate.value);
-//     filtered = filtered.filter((item) => new Date(item.created_at) >= start);
-//   }
-
-//   if (endRainDate.value) {
-//     const end = new Date(endRainDate.value);
-//     end.setDate(end.getDate() + 1); // include end date fully
-//     filtered = filtered.filter((item) => new Date(item.created_at) < end);
-//   }
-
-//   // Apply mode/time filters
-//   if (rainChartMode.value === "historical") {
-//     if (rainTimeFilter.value === "all") return filtered;
-//     const now = new Date();
-//     let filterTime = now;
-//     if (rainTimeFilter.value === "1h") filterTime = new Date(now - 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "6h") filterTime = new Date(now - 6 * 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "24h") filterTime = new Date(now - 24 * 60 * 60 * 1000);
-//     return filtered.filter((item) => new Date(item.created_at) >= filterTime);
-//   }
-
-//   // Realtime: last 500 points
-//   return filtered.slice(-500);
-// });
-
 let subscription = null;
 
 //water level & depth chart data over time
@@ -429,109 +410,6 @@ const chartData = computed(() => {
     ],
   };
 });
-
-// const filteredRainData = computed(() => {
-//   if (rainChartMode.value === "realtime") {
-//     // Last 500 points
-//     return data.value.slice(-500);
-//   } else {
-//     // Historical with time filter
-//     if (rainTimeFilter.value === "all") return data.value;
-//     const now = new Date();
-//     let filterTime = now;
-//     if (rainTimeFilter.value === "1h")
-//       filterTime = new Date(now - 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "6h")
-//       filterTime = new Date(now - 6 * 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "24h")
-//       filterTime = new Date(now - 24 * 60 * 60 * 1000);
-//     return data.value.filter((item) => new Date(item.created_at) >= filterTime);
-//   }
-// });
-
-// const filteredRainData = computed(() => {
-//   let filtered = data.value;
-
-//   // Apply date range filter first
-//   if (startRainDate.value) {
-//     const start = new Date(startRainDate.value);
-//     filtered = filtered.filter((item) => new Date(item.created_at) >= start);
-//   }
-
-//   if (endRainDate.value) {
-//     const end = new Date(endRainDate.value);
-//     end.setDate(end.getDate() + 1); // include end date fully
-//     filtered = filtered.filter((item) => new Date(item.created_at) < end);
-//   }
-
-//   // Apply mode/time filters for historical mode
-//   if (rainChartMode.value === "historical") {
-//     if (rainTimeFilter.value === "all") return filtered;
-
-//     const now = new Date();
-//     let filterTime = now;
-
-//     if (rainTimeFilter.value === "1h")
-//       filterTime = new Date(now - 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "6h")
-//       filterTime = new Date(now - 6 * 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "24h")
-//       filterTime = new Date(now - 24 * 60 * 60 * 1000);
-
-//     filtered = filtered.filter(
-//       (item) => new Date(item.created_at) >= filterTime
-//     );
-//   }
-
-//   // Realtime: only last 500 points
-//   if (rainChartMode.value === "realtime") {
-//     filtered = filtered.slice(-500);
-//   }
-
-//   return filtered;
-// });
-
-// const filteredRainData = computed(() => {
-//   let filtered = data.value;
-
-//   // --- Apply date range filter if selected ---
-//   if (rainTimeFilter.value === "dateRange") {
-//     if (startRainDate.value) {
-//       const start = new Date(startRainDate.value);
-//       filtered = filtered.filter((item) => new Date(item.created_at) >= start);
-//     }
-//     if (endRainDate.value) {
-//       const end = new Date(endRainDate.value);
-//       end.setDate(end.getDate() + 1); // include end date fully
-//       filtered = filtered.filter((item) => new Date(item.created_at) < end);
-//     }
-//     return filtered; // DONE: skip 1h/6h/24h
-//   }
-
-//   // --- Apply historical filters (1h/6h/24h) ---
-//   else if (rainChartMode.value === "historical") {
-//     const now = new Date();
-//     let filterTime = now;
-
-//     if (rainTimeFilter.value === "1h")
-//       filterTime = new Date(now - 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "6h")
-//       filterTime = new Date(now - 6 * 60 * 60 * 1000);
-//     if (rainTimeFilter.value === "24h")
-//       filterTime = new Date(now - 24 * 60 * 60 * 1000);
-
-//     filtered = filtered.filter(
-//       (item) => new Date(item.created_at) >= filterTime
-//     );
-//   }
-
-//   // --- Realtime: last 500 points ---
-//   if (rainChartMode.value === "realtime") {
-//     filtered = filtered.slice(-500);
-//   }
-
-//   return filtered;
-// });
 
 const filteredRainData = computed(() => {
   let filtered = data.value;
@@ -600,6 +478,15 @@ const waterLevelChartOptions = {
   plugins: {
     legend: {
       display: true,
+      labels: {
+        generateLabels: (chart) => {
+          return [
+            { text: "Normal (Safe)", fillStyle: "rgba(0,200,0,0.9)" }, // Green
+            { text: "Warning (Rising)", fillStyle: "rgba(255,165,0,0.9)" }, // Orange
+            { text: "Danger (High)", fillStyle: "rgba(255,0,0,0.9)" }, // Red
+          ];
+        },
+      },
       // labels: {
       //   font: { size: 14 },
       // },
@@ -665,7 +552,8 @@ const rainChartData = computed(() => {
   const rapidRiseThreshold = 5; // % increase per interval during rain
   const windowSize = 30; // points to check after rain
   const tolerance = 5; // how close to baseline is considered normal
-  const minDropRequired = 10; // must drop at least this much to be safe
+  const minDropRequired = 1;
+  // must drop at least this much to be safe
 
   let baseline = null;
   let rainStarted = false;
@@ -770,7 +658,7 @@ const latestBlockage = computed(() => {
   const rapidRiseThreshold = 5;
   const windowSize = 30;
   const tolerance = 5;
-  const minDropRequired = 10;
+  const minDropRequired = 1;
 
   let baseline = null;
   let rainStarted = false;
@@ -797,47 +685,56 @@ const latestBlockage = computed(() => {
     if (rainStopIndex !== null && !item.rain_state) {
       const count = i - rainStopIndex + 1;
 
-      if (count <= windowSize) {
-        const recent = filteredRainData.value.slice(rainStopIndex, i + 1);
-        const last = recent[recent.length - 1];
+      const recent = filteredRainData.value.slice(rainStopIndex, i + 1);
+      const start = recent[0].water_level;
+      const end = recent[recent.length - 1].water_level;
+      const drop = start - end;
 
-        const start = recent[0].water_level;
-        const end = last.water_level;
-        const drop = start - end;
+      const dateObj = new Date(recent[recent.length - 1].created_at);
+      const formattedDate = dateObj.toLocaleDateString();
+      const formattedTime = dateObj.toLocaleTimeString();
 
-        const dateObj = new Date(last.created_at);
-
-        const formattedDate = dateObj.toLocaleDateString();
-        const formattedTime = dateObj.toLocaleTimeString();
-
-        // 🔶 ORANGE - blockage
-        if (end > baseline + tolerance && drop < minDropRequired) {
-          lastOrange = {
-            status: "BLOCKAGE",
-            water: end,
-            index: i,
-            created_at: last.created_at,
-            date: formattedDate,
-            time: formattedTime,
-          };
-        }
-
-        // 🟢 GREEN - clear
-        if (end <= baseline + tolerance) {
-          lastGreen = {
-            status: "CLEAR",
-            water: end,
-            index: i,
-            created_at: last.created_at,
-            date: formattedDate,
-            time: formattedTime,
-          };
-        }
+      if (end > baseline + tolerance && drop < minDropRequired) {
+        lastOrange = {
+          status: "BLOCKAGE",
+          water: end,
+          index: i,
+          created_at: recent[recent.length - 1].created_at,
+          date: formattedDate,
+          time: formattedTime,
+        };
+      } else {
+        lastGreen = {
+          status: "CLEAR",
+          water: end,
+          index: i,
+          created_at: recent[recent.length - 1].created_at,
+          date: formattedDate,
+          time: formattedTime,
+        };
       }
     }
   });
 
-  return lastOrange || lastGreen || null;
+  // ✅ Always check the last point if no blockage/clear detected
+  const latest = filteredRainData.value.slice(-1)[0];
+  if (!latest) return null;
+
+  const lastDate = new Date(latest.created_at);
+  const formattedDate = lastDate.toLocaleDateString();
+  const formattedTime = lastDate.toLocaleTimeString();
+
+  // Return orange/green if detected
+  if (lastOrange) return { ...lastOrange };
+  if (lastGreen) return { ...lastGreen };
+
+  // Otherwise, fallback to NO BLOCKAGE
+  return {
+    status: "NO BLOCKAGE",
+    water: latest.water_level,
+    date: formattedDate,
+    time: formattedTime,
+  };
 });
 
 const rainChartOptions = reactive({
@@ -904,66 +801,6 @@ const chartOptions = reactive({
 watch(data, () => {
   // Chart.js automatically updates with reactive chartData
 });
-
-// watch(filteredRainData, (newData) => {
-//   const rapidRiseThreshold = 5; // % increase during rain
-//   const windowSize = 30; // number of points to check after rain
-//   const tolerance = 5; // how close to baseline is considered safe
-//   const minDropRequired = 10; // must drop this much to consider drain ok
-
-//   let baseline = null;
-//   let rainStarted = false;
-//   let rainStopIndex = null;
-
-//   // iterate over all points
-//   for (let i = 0; i < newData.length; i++) {
-//     const item = newData[i];
-
-//     // Rain start → set baseline
-//     if (item.rain_state && !rainStarted) {
-//       rainStarted = true;
-//       baseline = i > 0 ? newData[i - 1].water_level : item.water_level;
-//       rainStopIndex = null;
-//     }
-
-//     // Rain stopped → mark index
-//     if (!item.rain_state && rainStarted && rainStopIndex === null) {
-//       rainStopIndex = i;
-//     }
-
-//     // After rain → check if water not dropping properly
-//     if (rainStopIndex !== null && !item.rain_state) {
-//       const countAfterRain = i - rainStopIndex + 1;
-//       if (countAfterRain <= windowSize) {
-//         const recent = newData.slice(rainStopIndex, i + 1);
-//         const start = recent[0].water_level;
-//         const end = recent[recent.length - 1].water_level;
-//         const drop = start - end;
-
-//         // If water still high → blockage
-//         if (end > baseline + tolerance && drop < minDropRequired) {
-//           blockageAlert.value = `Drain blockage detected at ${new Date(
-//             item.created_at
-//           ).toLocaleTimeString()}`;
-//         } else if (end <= baseline + tolerance) {
-//           blockageAlert.value = null; // drain back to normal
-//         }
-//       }
-//     }
-
-//     // If new rain starts → reset baseline for next cycle
-//     if (item.rain_state && rainStopIndex !== null) {
-//       rainStopIndex = null;
-//       rainStarted = true;
-//       for (let j = i - 1; j >= 0; j--) {
-//         if (newData[j].water_level != null) {
-//           baseline = newData[j].water_level;
-//           break;
-//         }
-//       }
-//     }
-//   }
-// });
 
 const selectedDate = ref(null);
 
@@ -1032,54 +869,30 @@ watch(dailyForecast, (val) => {
   }
 });
 
-//flood prediction logic
-// watch(
-//   data,
-//   (newVal) => {
-//     if (!newVal.length) return;
-
-//     const latest = newVal[newVal.length - 1];
-
-//     if (latest.water_level >= 70) {
-//       highCount.value++;
-//     } else {
-//       highCount.value = 0;
-//     }
-
-//     floodRisk.value = highCount.value >= 15;
-//   },
-//   { deep: true }
-// );
-
-// watch(
-//   forecast,
-//   (list) => {
-//     if (!list || !list.length) return;
-
-//     weatherRisk.value = list.some((f) => {
-//       const rain = f?.rain?.["3h"] || f?.rain?.["1h"] || 0;
-
-//       const condition = f.weather?.[0]?.main?.toLowerCase() || "";
-
-//       return rain >= 10 || condition.includes("storm");
-//     });
-//   },
-//   { deep: true }
-// );
-
 //flood prediction
 
 const last30Data = computed(() => {
-  return data.value.slice(-2); // last 30 readings
+  return data.value.slice(-30); // last 30 readings
 });
 
-// Get the next forecast with rain (change threshold for testing)
 const nextFloodForecast = computed(() => {
   if (!forecast.value.length) return null;
-  return forecast.value.find((f) => {
-    const rain = f?.rain?.["3h"] || f?.rain?.["1h"] || 0;
-    return rain >= 1; // low for testing
+
+  const now = new Date();
+
+  // Filter forecasts that are actually in the future
+  const futureForecasts = forecast.value.filter((f) => {
+    const forecastTime = new Date(f.dt_txt); // f.dt_txt is UTC string
+    return forecastTime.getTime() > now.getTime();
   });
+
+  // Find first future forecast with rain >= threshold
+  const nextRainForecast = futureForecasts.find((f) => {
+    const rain = f?.rain?.["3h"] || f?.rain?.["1h"] || 0;
+    return rain >= 1.0; // <-- change threshold here
+  });
+
+  return nextRainForecast || null;
 });
 
 // Flood alert: all last 30 water high AND forecast predicts rain
@@ -1088,7 +901,7 @@ const floodAlertActive = computed(() => {
   if (!latest) return false;
 
   const allWaterHigh =
-    last30Data.value.length === 2 &&
+    last30Data.value.length === 30 &&
     last30Data.value.every((d) => d.water_level >= 70);
   const forecastHeavyRain = !!nextFloodForecast.value;
 
@@ -1110,44 +923,6 @@ const floodStatusText = computed(() => {
   }
   return "✅ No flood predicted";
 });
-
-// const waterHigh = computed(() => {
-//   // True if all of last 30 readings >= 70
-//   return last30Data.value.every((d) => d.water_level >= 70);
-// });
-
-// const predictedFlood = computed(() => {
-//   if (!waterHigh.value || !nextFloodForecast.value) return false;
-
-//   const now = new Date();
-//   const forecastTime = new Date(nextFloodForecast.value.dt_txt);
-
-//   // Only predict if forecast is in the future
-//   return forecastTime > now;
-// });
-
-// const nextFloodForecast = computed(() => {
-//   if (!forecast.value.length) return null;
-//   return forecast.value.find((f) => {
-//     const rain = f?.rain?.["3h"] || f?.rain?.["1h"] || 0;
-//     const condition = f.weather?.[0]?.main?.toLowerCase() || "";
-//     return rain >= 1 || condition.includes("storm");
-//   });
-// });
-
-// const floodAlertActive = computed(() => {
-//   const now = new Date();
-//   const forecastTime = nextFloodForecast.value
-//     ? new Date(nextFloodForecast.value.dt_txt)
-//     : null;
-
-//   // Active if predicted flood & water still high OR forecast not passed
-//   if (!predictedFlood.value) return false;
-//   if (latestWaterLevel.value < 40) return false; // water back to safe
-//   if (forecastTime && now > forecastTime) return false; // predicted time passed
-
-//   return true;
-// });
 
 // -------------------------
 // EASY ACCESS SELECTED OBJECT

@@ -1,11 +1,5 @@
 @import "tailwindcss";
 
-.daily-forecast {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
 .daily-card {
   cursor: pointer;
   width: 120px;
@@ -111,23 +105,9 @@
   gap: 20px; /* space between left and right columns */
   padding: 5px; /* space inside the container from edges */
   margin: 0 auto;
-
+  background: linear-gradient(to bottom, #f8fafc, #e0f2fe);
   box-sizing: border-box; /* ensures padding is included in width */
 }
-
-/* .chart-card {
-  width: 100%;
-  max-width: 520px;
-  height: 330px;
-  padding: 12px 15px;
-  border-radius: 16px;
-  border: 2px solid #4c9aff;
-  background: white;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-} */
 
 /* SCROLL AREA */
 .chart-scroll {
@@ -155,17 +135,6 @@
 /* .filter {
   margin-top: 10px;
 } */
-
-.blockage-card {
-  background-color: #ffcccc;
-  color: #a70000;
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  font-weight: bold;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
 
 .status-card {
   padding: 14px 16px;
@@ -223,6 +192,7 @@
 
 .tables-section {
   margin-top: 30px;
+  background: linear-gradient(to bottom, #f8fafc, #e0f2fe);
 }
 .water-card {
   width: 500px;
@@ -755,4 +725,17 @@ RIGHT PANEL
 
 .tables-section table::-webkit-scrollbar-track {
   background-color: #f0f0f0;
+}
+
+.dashboard-title {
+  text-align: center;
+  margin: 30px;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #1f2937; /* dark gray, professional */
+}
+
+.view-container {
+  background: linear-gradient(to bottom, #f8fafc, #e0f2fe);
 }
