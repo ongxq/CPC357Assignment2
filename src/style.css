@@ -102,7 +102,7 @@
 /* Chart container styles */
 .dashboard-grid {
   display: flex;
-  gap: 20px; /* space between left and right columns */
+  gap: 5px; /* space between left and right columns */
   padding: 5px; /* space inside the container from edges */
   margin: 0 auto;
   background: linear-gradient(to bottom, #f8fafc, #e0f2fe);

@@ -5,24 +5,19 @@ import {
   Title,
   Tooltip,
   Legend,
-  LineElement,
-  PointElement,
+  BarElement,
   LinearScale,
   CategoryScale,
-  TimeScale,
 } from "chart.js";
-import { Line } from "vue-chartjs";
-import "chartjs-adapter-date-fns";
+import { Bar } from "vue-chartjs";
 
 ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  LineElement,
-  PointElement,
+  BarElement,
   LinearScale,
-  CategoryScale,
-  TimeScale
+  CategoryScale
 );
 
 const props = defineProps({
@@ -32,5 +27,5 @@ const props = defineProps({
 </script>
 
 <template>
-  <Line :data="chartData" :options="chartOptions" />
+  <Bar :data="chartData" :options="chartOptions" />
 </template>
