@@ -57,50 +57,42 @@ const chartData = computed(() => {
     return a.index - b.index;
   });
 
-  // Create labels
-  const labels = sortedData.map((item, index) => {
-    return `Record ${index + 1}`;
-  });
+  // Use dates as labels
+  const labels = sortedData.map((item) =>
+    new Date(item.created_at).toLocaleDateString()
+  );
 
-  // Extract values for each field
+  // Extract values for water level only
   const waterLevelValues = sortedData.map((item) => {
     const val = parseFloat(item.water_level) || 0;
     return isNaN(val) ? 0 : val;
   });
 
-  const distanceValues = sortedData.map((item) => {
-    const val = parseFloat(item.distance) || 0;
-    return isNaN(val) ? 0 : val;
-  });
-
-  const waterDepthValues = sortedData.map((item) => {
-    const val = parseFloat(item.water_depth) || 0;
-    return isNaN(val) ? 0 : val;
+  // Generate colors based on water level status AND rain state
+  const backgroundColor = sortedData.map((item) => {
+    const level = parseFloat(item.water_level) || 0;
+    
+    if (item.rain_state) {
+      // During rain: lighter shades
+      if (level < 40) return "rgba(0,200,0,0.7)"; // Light green (rain)
+      if (level < 70) return "rgba(255,165,0,0.7)"; // Light orange (rain)
+      return "rgba(255,0,0,0.7)"; // Light red (rain)
+    } else {
+      // No rain: standard shades
+      if (level < 40) return "rgba(0,200,0,0.9)"; // Green (safe)
+      if (level < 70) return "rgba(255,165,0,0.9)"; // Orange (warning)
+      return "rgba(255,0,0,0.9)"; // Red (danger)
+    }
   });
 
   return {
     labels,
     datasets: [
       {
-        label: "Water Level",
+        label: "Water Level (%)",
         data: waterLevelValues,
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-      },
-      {
-        label: "Distance",
-        data: distanceValues,
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1,
-      },
-      {
-        label: "Water Depth",
-        data: waterDepthValues,
-        backgroundColor: "rgba(255, 99, 132, 0.6)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
+        backgroundColor: backgroundColor,
+        borderRadius: 4,
       },
     ],
   };
@@ -108,25 +100,43 @@ const chartData = computed(() => {
 
 const chartOptions = {
   responsive: true,
-  maintainAspectRatio: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       display: true,
-      position: "top",
       labels: {
-        color: "#333",
-        font: { size: 12 },
+        generateLabels: (chart) => {
+          return [
+            { text: "Normal (Safe) - No Rain", fillStyle: "rgba(0,200,0,0.9)" },
+            { text: "Normal (Safe) - Raining", fillStyle: "rgba(0,200,0,0.7)" },
+            { text: "Warning (Rising) - No Rain", fillStyle: "rgba(255,165,0,0.9)" },
+            { text: "Warning (Rising) - Raining", fillStyle: "rgba(255,165,0,0.7)" },
+            { text: "Danger (High) - No Rain", fillStyle: "rgba(255,0,0,0.9)" },
+            { text: "Danger (High) - Raining", fillStyle: "rgba(255,0,0,0.7)" },
+          ];
+        },
       },
     },
     tooltip: {
-      backgroundColor: "rgba(0, 0, 0, 0.8)",
-      titleColor: "#fff",
-      bodyColor: "#fff",
+      callbacks: {
+        title: (tooltipItems) => {
+          const idx = tooltipItems[0].dataIndex;
+          const timestamp = processedData.value[idx].created_at;
+          return new Date(timestamp).toLocaleString();
+        },
+        label: (tooltipItem) => {
+          const idx = tooltipItem.dataIndex;
+          const rainState = processedData.value[idx].rain_state ? "Raining" : "No Rain";
+          return `Water Level: ${tooltipItem.raw}% • ${rainState}`;
+        },
+      },
     },
   },
   scales: {
     y: {
+      title: { display: true, text: "Water Level (%)" },
       beginAtZero: true,
+      max: 100,
       grid: {
         color: "rgba(0, 0, 0, 0.1)",
       },
@@ -148,12 +158,15 @@ const chartOptions = {
 const fetchData = async () => {
   try {
     const snapshot = await getDocs(collection(db, "drain_data"));
-    processedData.value = snapshot.docs.map((doc, index) => {
+    const allData = snapshot.docs.map((doc, index) => {
       const docData = doc.data();
       const extracted = extractData(docData);
       return { ...extracted, index };
     });
-    console.log("Bar Chart Data:", processedData.value);
+    
+    // Keep only the last 30 records
+    processedData.value = allData.slice(-30);
+    console.log("Bar Chart Data (Last 30):", processedData.value);
   } catch (err) {
     console.error("Error fetching data:", err);
     processedData.value = [];

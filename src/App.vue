@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { authService } from "./services/authService.js";
 
@@ -39,29 +39,23 @@ const router = useRouter();
 const isAuthenticated = ref(false);
 const userEmail = ref("");
 
-const checkAuthState = () => {
+onMounted(() => {
+  // Check if user is logged in
   const user = authService.getCurrentUser();
   if (user) {
     isAuthenticated.value = true;
     userEmail.value = user.email;
-  } else {
-    isAuthenticated.value = false;
-    userEmail.value = "";
   }
-};
-
-onMounted(() => {
-  // Check initial auth state
-  checkAuthState();
 
   // Monitor auth state changes
   authService.onAuthStateChange((user) => {
-    checkAuthState();
-  });
-
-  // Also watch for route changes to update auth state
-  router.afterEach(() => {
-    checkAuthState();
+    if (user) {
+      isAuthenticated.value = true;
+      userEmail.value = user.email;
+    } else {
+      isAuthenticated.value = false;
+      userEmail.value = "";
+    }
   });
 });
 

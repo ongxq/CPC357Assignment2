@@ -125,14 +125,7 @@
     CHARTS SECTION (FULL WIDTH)
     ========================== -->
     <div class="charts-full-section charts-one-row">
-      <!-- BAR CHART -->
-      <div class="chart-container">
-        <h2>Water Level Analysis - Bar Chart</h2>
-        <div v-if="barChartData && barChartData.labels && barChartData.labels.length > 0" class="chart-wrapper">
-          <Bar :data="barChartData" :options="barChartOptions" />
-        </div>
-        <div v-else class="no-data">No data available for bar chart</div>
-      </div>
+      
 
       <!-- WATER LEVEL STATUS CHART -->
       <div class="chart-container">
@@ -931,18 +924,31 @@ const barChartData = computed(() => {
     return { labels: [], datasets: [] };
   }
 
-  const labels = data.value.map((item, index) => `Record ${index + 1}`);
+  // Use dates as labels (matching Water Level Status chart)
+  const labels = data.value.map((item) =>
+    new Date(item.created_at).toLocaleDateString()
+  );
+
   const waterLevelValues = data.value.map((item) => {
     const val = parseFloat(item.water_level) || 0;
     return isNaN(val) ? 0 : val;
   });
-  const waterDepthValues = data.value.map((item) => {
-    const val = parseFloat(item.water_depth) || 0;
-    return isNaN(val) ? 0 : val;
-  });
-  const distanceValues = data.value.map((item) => {
-    const val = parseFloat(item.distance) || 0;
-    return isNaN(val) ? 0 : val;
+
+  // Generate colors based on water level status AND rain state (matching Water Level Status + Rain State)
+  const backgroundColor = data.value.map((item) => {
+    const level = parseFloat(item.water_level) || 0;
+    
+    if (item.rain_state) {
+      // During rain: lighter shades
+      if (level < 40) return "rgba(0,200,0,0.7)"; // Light green (rain)
+      if (level < 70) return "rgba(255,165,0,0.7)"; // Light orange (rain)
+      return "rgba(255,0,0,0.7)"; // Light red (rain)
+    } else {
+      // No rain: standard shades
+      if (level < 40) return "rgba(0,200,0,0.9)"; // Green (safe)
+      if (level < 70) return "rgba(255,165,0,0.9)"; // Orange (warning)
+      return "rgba(255,0,0,0.9)"; // Red (danger)
+    }
   });
 
   return {
@@ -951,23 +957,10 @@ const barChartData = computed(() => {
       {
         label: "Water Level (%)",
         data: waterLevelValues,
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: backgroundColor,
+        borderColor: backgroundColor,
         borderWidth: 1,
-      },
-      {
-        label: "Water Depth (cm)",
-        data: waterDepthValues,
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1,
-      },
-      {
-        label: "Distance (cm)",
-        data: distanceValues,
-        backgroundColor: "rgba(255, 99, 132, 0.6)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
+        borderRadius: 4,
       },
     ],
   };
@@ -975,25 +968,43 @@ const barChartData = computed(() => {
 
 const barChartOptions = {
   responsive: true,
-  maintainAspectRatio: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       display: true,
-      position: "top",
       labels: {
-        color: "#333",
-        font: { size: 12 },
+        generateLabels: (chart) => {
+          return [
+            { text: "Normal (Safe) - No Rain", fillStyle: "rgba(0,200,0,0.9)" },
+            { text: "Normal (Safe) - Raining", fillStyle: "rgba(0,200,0,0.7)" },
+            { text: "Warning (Rising) - No Rain", fillStyle: "rgba(255,165,0,0.9)" },
+            { text: "Warning (Rising) - Raining", fillStyle: "rgba(255,165,0,0.7)" },
+            { text: "Danger (High) - No Rain", fillStyle: "rgba(255,0,0,0.9)" },
+            { text: "Danger (High) - Raining", fillStyle: "rgba(255,0,0,0.7)" },
+          ];
+        },
       },
     },
     tooltip: {
-      backgroundColor: "rgba(0, 0, 0, 0.8)",
-      titleColor: "#fff",
-      bodyColor: "#fff",
+      callbacks: {
+        title: (tooltipItems) => {
+          const idx = tooltipItems[0].dataIndex;
+          const timestamp = data.value[idx].created_at;
+          return new Date(timestamp).toLocaleString();
+        },
+        label: (tooltipItem) => {
+          const idx = tooltipItem.dataIndex;
+          const rainState = data.value[idx].rain_state ? "Raining" : "No Rain";
+          return `Water Level: ${tooltipItem.raw}% • ${rainState}`;
+        },
+      },
     },
   },
   scales: {
     y: {
+      title: { display: true, text: "Water Level (%)" },
       beginAtZero: true,
+      max: 100,
       grid: {
         color: "rgba(0, 0, 0, 0.1)",
       },

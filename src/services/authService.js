@@ -12,7 +12,7 @@ const users = [
 ];
 
 export const authService = {
-  // Local login (without Firebase)
+  // Local login
   async localLogin(email, password) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
