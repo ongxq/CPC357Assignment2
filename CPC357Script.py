@@ -3,14 +3,14 @@ import requests
 import paho.mqtt.client as mqtt
 
 # ================= FIREBASE CONFIG =================
-PROJECT_ID = "cpc357project-29ccf"  # Replace with your Firebase project ID
-API_KEY = "AIzaSyAFYGSZjbjL0YXbRTXPMeAwBUwGbDdR1Ns"    # Replace with your Web API key
+PROJECT_ID = ""  # Replace with your Firebase project ID
+API_KEY = ""    # Replace with your Web API key
 COLLECTION_NAME = "drain_data"
 
-FIREBASE_URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/{COLLECTION_NAME}?key={API_KEY}"
+FIREBASE_URL = f"" #Insert the Firebase URL
 
 # ================= MQTT CONFIG =================
-MQTT_BROKER = "34.70.130.230"  # Your GCP VM public IP
+MQTT_BROKER = ""  # Your GCP VM public IP
 MQTT_PORT = 1883
 MQTT_TOPIC = "iot/drain_data"
 
