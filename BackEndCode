@@ -1,12 +1,13 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <time.h>  // For timestamp
 
 // ================= WIFI =================
 const char* WIFI_SSID = "Wuliwulii ";
 const char* WIFI_PASSWORD = "1024$$oxq";
 
 // ================= MQTT =================
-const char* MQTT_SERVER = ""; // Insert Your GCP VM public IP
+const char* MQTT_SERVER = ""; // Your GCP VM public IP
 const int MQTT_PORT = 1883;
 const char* MQTT_TOPIC = "iot/drain_data";
 
@@ -22,15 +23,20 @@ PubSubClient client(espClient);
 #define YELLOW_LED 26
 #define RED_LED 27
 
-// ----------- TANK CONFIGURATION -----------
+// ----------- TANK CONFIGURATION ----------- 
 const float BOTTOM_DISTANCE = 10.08;   // cm (sensor → bottom when empty)
-const float SENSOR_OFFSET   = 2.0;    // cm (sensor → max water level gap)
+const float SENSOR_OFFSET   = 2.0;     // cm (sensor → max water level gap)
 const float USABLE_HEIGHT   = BOTTOM_DISTANCE - SENSOR_OFFSET;
 const int NUM_SAMPLES = 5;
 
 // Blockage detection
 unsigned long highLevelStart = 0;
 float lastWaterPercent = 0;
+
+// ================= NTP CONFIG =================
+const char* NTP_SERVER = "pool.ntp.org";
+const long  GMT_OFFSET_SEC = 8 * 3600;  // Malaysia GMT+8
+const int   DAYLIGHT_OFFSET_SEC = 0;
 
 // ================= MQTT FUNCTIONS =================
 void reconnect() {
@@ -74,6 +80,16 @@ void setup() {
 
   // Setup MQTT
   setupMQTT();
+
+  // Initialize NTP
+  configTime(GMT_OFFSET_SEC, DAYLIGHT_OFFSET_SEC, NTP_SERVER);
+  Serial.println("Waiting for time...");
+  struct tm timeinfo;
+  while (!getLocalTime(&timeinfo)) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println("\nTime initialized!");
 
   Serial.println("=== Drain Monitor Started ===");
   Serial.print("Bottom distance: "); Serial.print(BOTTOM_DISTANCE); Serial.println(" cm");
@@ -139,7 +155,7 @@ void loop() {
   // Rain sensor (active HIGH)
   bool rainState = !digitalRead(RAIN_PIN);
 
-  // ----------- DISPLAY -----------
+  // ----------- DISPLAY ----------- 
   Serial.println("================================");
   Serial.print("Measured distance: "); Serial.print(distance, 2); Serial.println(" cm");
   Serial.print("Water depth: "); Serial.print(waterDepth, 2); Serial.println(" cm");
@@ -185,8 +201,18 @@ void loop() {
     Serial.println("🌧⚠ RAIN + HIGH WATER — Check drain!");
   }
 
-  // ----------- MQTT PUBLISH -----------
+  // ================= GET TIMESTAMP =================
+  struct tm timeinfo;
+  char timeString[30];
+  if (getLocalTime(&timeinfo)) {
+    strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", &timeinfo);
+  } else {
+    strcpy(timeString, "unknown");
+  }
+
+  // ----------- MQTT PUBLISH ----------- 
   String payload = "{";
+  payload += "\"created_at\":\"" + String(timeString) + "\",";
   payload += "\"water_level\":" + String(waterPercent, 1) + ",";
   payload += "\"water_depth\":" + String(waterDepth, 2) + ",";
   payload += "\"distance\":" + String(distance, 2) + ",";
